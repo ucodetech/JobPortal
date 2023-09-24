@@ -3,8 +3,8 @@
         <div class="w-full md:w-1/2 py-24 mx-auto">
             <div class="mb-4">
                 <h2 class="text-2xl font-medium text-gray-900 title-font">
-                    Create a new listing(N4000)
-                   
+                    Create a new listing
+
                 </h2>
             </div>
             <x-message></x-message>
@@ -84,13 +84,13 @@
                 </div>
                 <div class="flex mb-4">
                     <div class="flex-1 mx-2">
-                        <x-input-label for="content" value="Job Descriptions and requirements" />
+                        <x-input-label for="description" value="Job Descriptions and requirements" />
                         <textarea
                             class="block mt-1 w-full bg-white"
-                            id="content"
+                            id="description"
                             type="text"
-                            name="content"
-                            :value="old('content')"
+                            name="description"
+                            :value="old('description')"
                             rows="8"
                             required ></textarea>
                     </div>
@@ -106,14 +106,14 @@
                             :value="old('is_highlighted')"
                             value="yes"
                             />
-                            <span class="ml-2 text-white">Highlight this post (extra N1200)</span>
+                            <span class="ml-2 text-white">Highlight this post </span>
                     </div>
                 </div>
                 <div class="mb-6 mx-2">
-                    
+
                 </div>
                 <div class="mb-2 mx-2">
-                    <button type="submit" id="form_submit" class="block w-full items-center bg-indigo-500 text-white border-0 py-2 focus:outline-none hover:bg-indigo-600 rounded text-base mt-4 md:mt-0">Pay + Continue</button>
+                    <button type="submit" id="form_submit" class="block w-full items-center bg-indigo-500 text-white border-0 py-2 focus:outline-none hover:bg-indigo-600 rounded text-base mt-4 md:mt-0">Post</button>
                 </div>
             </form>
         </div>
@@ -122,12 +122,12 @@
 
         <script>
             $(function(){
-                $('#content').summernote({
+                $('#description').summernote({
                     height: 200,
-                   
+
                 });
-              
-              
+
+
                 // $('#content').summernote({
                 //     placeholder: 'Hello stand alone ui',
                 //     tabsize: 2,

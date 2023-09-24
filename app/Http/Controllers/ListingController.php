@@ -18,7 +18,7 @@ use Illuminate\Support\Carbon;
 
 class ListingController extends Controller
 {
-   
+
 
     public function index(Request $request){
         $listings = Listing::where('is_active', true)->with('tags')->latest()->get();
@@ -44,7 +44,7 @@ class ListingController extends Controller
             $listings = $listings->filter(function($listing) use($tag){
                 return $listing->tags->contains('slug', $tag);
             });
-            
+
         }
         return view('Listings.index', ['listings'=>$listings, 'tags'=>$tags]);
     }
@@ -62,7 +62,7 @@ class ListingController extends Controller
                 'ip_address' => $request->ip(),
         ]);
         return redirect()->to($listing->apply_link);
- 
+
      }
 
      public function create(User $user){
@@ -70,17 +70,17 @@ class ListingController extends Controller
      }
 
      public function store(Request $request){
-      
+
             $validation = [
                     'title' => 'required',
                     'company' => 'required',
                     'logo' => 'file|max:2048|mimes:png,jpg,jpeg',
                     'location' => 'required',
                     'apply_link' => 'required|url',
-                    'content' => 'required',
-                   
+                    'description' => 'required',
+
             ];
-           
+
             $request->validate($validation);
 
             if(Auth::check()){
@@ -89,14 +89,14 @@ class ListingController extends Controller
             // check if user exist, if not create new user
 
              try {
-                $mytrancamount = 4000;
-                $amount = 40000 * 10; //4000
-                $extrafee = 12000 * 10;
-                if($request->filled('is_highlighted')){
-                    $amount += $extrafee;
-                }
+//                $mytrancamount = 4000;
+//                $amount = 40000 * 10; //4000
+//                $extrafee = 12000 * 10;
+//                if($request->filled('is_highlighted')){
+//                    $amount += $extrafee;
+//                }
                 $orderid = '#ORD'.rand(1111,9999);
-              
+
                 if($request->hasFile('logo')){
                     $file = $request->file('logo');
                     $logo = $request->company . rand(11111,99999) .'.'. $file->extension();
@@ -114,21 +114,21 @@ class ListingController extends Controller
                             'logo' => $logo,
                             'location' => $request->location,
                             'apply_link' => $request->apply_link,
-                            'content' => $request->content, 
+                            'content' => $request->description,
                             'is_highlighted' => $request->filled('is_highlighted'),
-                            'is_active' => false,
-                            'created_at' => Carbon::now()         
+                            'is_active' => true,
+                            'created_at' => Carbon::now()
                 ]);
-                $reference = hash('sha256', Str::random(16));
-                  // add to transaction table
-                  $user->transactions()->create([
-                    'amount' => $mytrancamount,
-                    'reference' => $reference,
-                    'orderID' => $orderid,
-                    'created_at' => Carbon::now(),
-                    'listing_id' => $listing->id,
-                    'status' => 'pending'
-                ]);
+//                $reference = hash('sha256', Str::random(16));
+//                  // add to transaction table
+//                  $user->transactions()->create([
+//                    'amount' => $mytrancamount,
+//                    'reference' => $reference,
+//                    'orderID' => $orderid,
+//                    'created_at' => Carbon::now(),
+//                    'listing_id' => $listing->id,
+//                    'status' => 'pending'
+//                ]);
 
                 foreach(explode(',',$request->tags) as $requestTag){
                     $tag = Tag::firstOrCreate([
@@ -140,50 +140,50 @@ class ListingController extends Controller
                     $tag->listings()->attach($listing->id);
                 }
                 // Dynamic callback URL
-                $callbackUrl = route('return.pay');
-                $data = array(
-                        "amount" => $amount,
-                        'email' => $user->email,
-                        'reference' =>$reference,
-                        'orderID' => $orderid,
-                        'listing_id' => $listing->id,
-                        'callback_url' => $callbackUrl,
-                );
-                return Paystack::getAuthorizationUrl($data)->redirectNow();
+//                $callbackUrl = route('return.pay');
+//                $data = array(
+//                        "amount" => $amount,
+//                        'email' => $user->email,
+//                        'reference' =>$reference,
+//                        'orderID' => $orderid,
+//                        'listing_id' => $listing->id,
+//                        'callback_url' => $callbackUrl,
+//                );
+//                return Paystack::getAuthorizationUrl($data)->redirectNow();
+                 return redirect()->route('dashboard')->with('success', 'You have successfully posted a job!');
 
-              
              } catch (\Exception $e) {
-                return Redirect::back()->withErrors($e->getMessage())->withInput();  
+                return Redirect::back()->withErrors($e->getMessage())->withInput();
              }
-           
 
-     }  
-     
-    public function returnPay(){
 
-        $response =  paystack()->getPaymentData();
-        if($response['data']['status'] == true){
-            $trans = Transaction::where('reference', $response['data']['reference'])->first();
-            if($trans){
-                $trans->update(['status'=>'paid']);
-                Listing::where('id', $trans->listing_id)->update(['is_active'=>true]);
-                return redirect()->intended(route('dashboard'))->with('success', 'You have succeffully made payment and completed your acount for listing of jobs, you can now list more jobs!');
-            }else{
-                return redirect()->route('listing.payment.error')->with('warning', 'An error occured while making payment, please do not reintiated the payment, contact support team for help!');
-            }
-            
-            
-        }else{
-            //logout
-            return redirect()->route('listing.payment.error')->with('warning', 'An error occured while making payment, please do not reintiated the payment, contact support team for help!');
-        }
-        
-        
-    }
+     }
 
+//    public function returnPay(){
+//
+//        $response =  paystack()->getPaymentData();
+//        if($response['data']['status'] == true){
+//            $trans = Transaction::where('reference', $response['data']['reference'])->first();
+//            if($trans){
+//                $trans->update(['status'=>'paid']);
+//                Listing::where('id', $trans->listing_id)->update(['is_active'=>true]);
+//                return redirect()->intended(route('dashboard'))->with('success', 'You have succeffully made payment and completed your acount for listing of jobs, you can now list more jobs!');
+//            }else{
+//                return redirect()->route('listing.payment.error')->with('warning', 'An error occured while making payment, please do not reintiated the payment, contact support team for help!');
+//            }
+//
+//
+//        }else{
+//            //logout
+//            return redirect()->route('listing.payment.error')->with('warning', 'An error occured while making payment, please do not reintiated the payment, contact support team for help!');
+//        }
+//
+//
+//    }
+//
 
     public function paymentError(){
         return view('Listings.payment-error');
     }
 
-}   
+}
